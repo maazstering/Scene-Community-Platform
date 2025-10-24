@@ -33,6 +33,8 @@ def index() -> rx.Component:
     )
 
 
+from app.backend.main import app as backend_app
+
 app = rx.App(
     theme=rx.theme(appearance="light", accent_color="teal", radius="large"),
     head_components=[
@@ -43,6 +45,7 @@ app = rx.App(
             rel="stylesheet",
         ),
     ],
+    api_transformer=backend_app,
 )
 app.add_page(index, on_load=BaseState.check_auth)
 app.add_page(scene, route="/scene", on_load=[SceneState.on_load, BaseState.check_auth])

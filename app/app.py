@@ -28,7 +28,7 @@ def index() -> rx.Component:
                 ),
                 class_name="relative isolate px-6 pt-14 lg:px-8",
             ),
-            login_modal(),
+            rx.cond(~BaseState.is_authenticated, login_modal()),
         )
     )
 
@@ -48,14 +48,14 @@ app = rx.App(
     api_transformer=backend_app,
 )
 app.add_page(index, on_load=BaseState.check_auth)
-app.add_page(scene, route="/scene", on_load=[SceneState.on_load, BaseState.check_auth])
+app.add_page(scene, route="/scene", on_load=[BaseState.check_auth, SceneState.on_load])
 app.add_page(
     scene,
     route="/activity/[activity_id]",
-    on_load=[SceneState.on_load_detail, BaseState.check_auth],
+    on_load=[BaseState.check_auth, SceneState.on_load_detail],
 )
 app.add_page(
     scene,
     route="/event/[event_id]",
-    on_load=[SceneState.on_load_detail, BaseState.check_auth],
+    on_load=[BaseState.check_auth, SceneState.on_load_detail],
 )

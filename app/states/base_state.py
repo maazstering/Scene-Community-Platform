@@ -7,41 +7,80 @@ import logging
 class BaseState(rx.State):
     is_authenticated: bool = False
     invite_code: str = ""
-    access_token: str = ""
+    access_token: str
+    auth_mode: str = "login"
+    loading: bool = False
+    error_message: str = ""
+
+    @rx.event
+    def set_auth_mode(self, mode: str):
+        self.auth_mode = mode
+        self.error_message = ""
 
     @rx.event
     async def login(self, form_data: dict):
-        scene_state = await self.get_state(SceneState)
+        self.loading = True
+        self.error_message = ""
         phone_or_email = form_data.get("phone_or_email", "")
-        name = form_data.get("name", "")
-        if not phone_or_email or not name:
-            return rx.window_alert("Phone/Email and Name are required.")
+        password = form_data.get("password", "")
+        if not phone_or_email or not password:
+            self.error_message = "Email and password are required."
+            self.loading = False
+            return
         try:
-            scene_state.loading = True
             response = await api_client.post(
                 "/api/v1/auth/login",
-                data={"phone_or_email": phone_or_email, "name": name},
+                data={
+                    "phone_or_email": phone_or_email,
+                    "password": password,
+                    "name": "",
+                },
             )
             access_token = response.get("access_token")
             if access_token:
                 self.access_token = access_token
                 self.is_authenticated = True
-                scene_state.loading = False
-                return [
-                    rx.Cookie(
-                        name="access_token",
-                        value=access_token,
-                        max_age=response.get("expires_in", 3600),
-                    ),
-                    rx.redirect("/scene"),
-                ]
+                self.loading = False
+                return rx.redirect("/scene")
             else:
-                scene_state.error_message = "Login failed: No access token received."
+                self.error_message = "Login failed: No access token received."
         except Exception as e:
             logging.exception(f"Login error: {e}")
-            scene_state.error_message = "Login failed. Please try again."
+            self.error_message = (
+                "Login failed. Please check your credentials and try again."
+            )
         finally:
-            scene_state.loading = False
+            self.loading = False
+
+    @rx.event
+    async def signup(self, form_data: dict):
+        self.loading = True
+        self.error_message = ""
+        name = form_data.get("name", "")
+        phone_or_email = form_data.get("phone_or_email", "")
+        password = form_data.get("password", "")
+        invite_code = form_data.get("invite_code", "")
+        if not name or not phone_or_email or (not password):
+            self.error_message = "Name, email, and password are required."
+            self.loading = False
+            return
+        try:
+            response = await api_client.post(
+                "/api/v1/auth/login",
+                data={
+                    "name": name,
+                    "phone_or_email": phone_or_email,
+                    "password": password,
+                },
+            )
+            self.auth_mode = "login"
+            scene_state = await self.get_state(SceneState)
+            scene_state.success_message = "Signup successful! Please log in."
+        except Exception as e:
+            logging.exception(f"Signup error: {e}")
+            self.error_message = "Signup failed. Please try again."
+        finally:
+            self.loading = False
 
     @rx.event
     async def logout(self):
@@ -52,28 +91,35 @@ class BaseState(rx.State):
             logging.exception(f"Logout error: {e}")
         finally:
             self.is_authenticated = False
-            self.access_token = ""
+            self.reset()
             scene_state.current_user_id = ""
-            return [rx.remove_cookie("access_token"), rx.redirect("/")]
+            return rx.redirect("/")
 
     @rx.event
-    async def check_auth(self, cookies: dict[str, str] | None = None):
-        token = ""
-        if cookies:
-            token = cookies.get("access_token", "")
-        self.access_token = token
-        is_public_share_page = self.router.page.path.startswith(
-            "/activity/"
-        ) or self.router.page.path.startswith("/event/")
-        self.is_authenticated = bool(token)
-        if (
-            self.router.page.path != "/"
-            and (not self.is_authenticated)
-            and (not is_public_share_page)
-        ):
-            return rx.redirect("/")
-        if self.router.page.path == "/" and self.is_authenticated:
-            return rx.redirect("/scene")
+    async def check_auth(self):
+        if not self.is_authenticated:
+            if self.router.page.path != "/":
+                is_public_share_page = self.router.page.path.startswith(
+                    "/activity/"
+                ) or self.router.page.path.startswith("/event/")
+                if not is_public_share_page:
+                    return rx.redirect("/")
+            return
+        try:
+            user_data = await api_client.get("/api/v1/auth/me", token=self.access_token)
+            if user_data:
+                self.is_authenticated = True
+                if self.router.page.path == "/":
+                    return rx.redirect("/scene")
+            else:
+                self.is_authenticated = False
+                if self.router.page.path != "/":
+                    return rx.redirect("/")
+        except Exception as e:
+            logging.exception(f"Error checking auth: {e}")
+            self.is_authenticated = False
+            if self.router.page.path != "/":
+                return rx.redirect("/")
 
     @rx.event
     def go_to_scene(self):

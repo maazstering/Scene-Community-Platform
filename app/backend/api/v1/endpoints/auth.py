@@ -14,7 +14,12 @@ async def login(request: LoginRequest):
     """Authenticate user and return tokens."""
     user = memory_store.get_user_by_email(email=request.phone_or_email)
     if not user:
-        user = memory_store.create_user(name=request.name, email=request.phone_or_email)
+        if request.name:
+            user = memory_store.create_user(
+                name=request.name, email=request.phone_or_email
+            )
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
     access_token = create_access_token(subject=user["id"])
     refresh_token = create_refresh_token(subject=user["id"])
     return {

@@ -4,7 +4,8 @@ from typing import Optional
 
 class LoginRequest(BaseModel):
     phone_or_email: str
-    name: str
+    name: Optional[str] = None
+    password: Optional[str] = None
 
 
 class OTPRequest(BaseModel):

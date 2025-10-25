@@ -20,7 +20,13 @@ def _auth_form_input(name: str, placeholder: str, type: str = "text") -> rx.Comp
 
 def login_form() -> rx.Component:
     return rx.el.form(
-        _auth_form_input("phone_or_email", "you@example.com", "email"),
+        _auth_form_input("phone_or_email", "ahmed.khan@scene.com", "email"),
+        rx.el.div(
+            rx.el.p(
+                "Demo users: ahmed.khan@scene.com, fatima.ali@scene.com (pw: test123)",
+                class_name="text-xs text-gray-500 text-center -mt-2 mb-4",
+            )
+        ),
         _auth_form_input("password", "••••••••", "password"),
         rx.el.button(
             "Sign In",

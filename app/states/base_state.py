@@ -46,9 +46,12 @@ class BaseState(rx.State):
                 self.error_message = "Login failed: No access token received."
         except Exception as e:
             logging.exception(f"Login error: {e}")
-            self.error_message = (
-                "Login failed. Please check your credentials and try again."
-            )
+            if "404" in str(e) and "Not Found" in str(e):
+                self.error_message = "User not found. Try a demo user like 'ahmed.khan@scene.com' (pw: test123)"
+            else:
+                self.error_message = (
+                    "Login failed. Please check your credentials and try again."
+                )
         finally:
             self.loading = False
 
@@ -74,11 +77,11 @@ class BaseState(rx.State):
                 },
             )
             self.auth_mode = "login"
-            scene_state = await self.get_state(SceneState)
-            scene_state.success_message = "Signup successful! Please log in."
+            self.error_message = ""
+            rx.toast("Signup successful! Please log in.")
         except Exception as e:
             logging.exception(f"Signup error: {e}")
-            self.error_message = "Signup failed. Please try again."
+            self.error_message = "Signup failed. This email may already be in use."
         finally:
             self.loading = False
 

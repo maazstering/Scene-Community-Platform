@@ -1,6 +1,7 @@
 import reflex as rx
 from typing import Any
 from app.states.scene_state import SceneState
+from app.states.base_state import BaseState
 from app.utils.api_client import api_client
 import uuid
 import secrets
@@ -109,7 +110,7 @@ class WizardState(rx.State):
         self.is_publishing = True
         try:
             scene_state = await self.get_state(SceneState)
-            base_state = await self.get_state(rx.State)
+            base_state = await self.get_state(BaseState)
             datetime_start = f"{self.form_data.get('date', '')}T{self.form_data.get('start_time', '')}:00"
             payload = {
                 "activity_type_id": self.form_data.get("activity_type_id", "paddle"),
@@ -145,7 +146,7 @@ class WizardState(rx.State):
         self.is_publishing = True
         try:
             scene_state = await self.get_state(SceneState)
-            base_state = await self.get_state(rx.State)
+            base_state = await self.get_state(BaseState)
             start_time = f"{self.form_data.get('date', '')}T{self.form_data.get('start_time', '')}:00"
             payload = {
                 "title": self.form_data.get("title", ""),

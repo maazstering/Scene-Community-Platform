@@ -100,7 +100,8 @@ class BaseState(rx.State):
 
     @rx.event
     async def check_auth(self):
-        if not self.is_authenticated:
+        if not self.access_token:
+            self.is_authenticated = False
             if self.router.page.path != "/":
                 is_public_share_page = self.router.page.path.startswith(
                     "/activity/"
@@ -108,21 +109,25 @@ class BaseState(rx.State):
                 if not is_public_share_page:
                     return rx.redirect("/")
             return
-        try:
-            user_data = await api_client.get("/api/v1/auth/me", token=self.access_token)
-            if user_data:
-                self.is_authenticated = True
-                if self.router.page.path == "/":
-                    return rx.redirect("/scene")
-            else:
+        if not self.is_authenticated:
+            try:
+                user_data = await api_client.get(
+                    "/api/v1/auth/me", token=self.access_token
+                )
+                if user_data:
+                    self.is_authenticated = True
+                    if self.router.page.path == "/":
+                        return rx.redirect("/scene")
+                else:
+                    self.is_authenticated = False
+                    if self.router.page.path != "/":
+                        return rx.redirect("/")
+            except Exception as e:
+                logging.exception(f"Error checking auth: {e}")
                 self.is_authenticated = False
+                self.access_token = ""
                 if self.router.page.path != "/":
                     return rx.redirect("/")
-        except Exception as e:
-            logging.exception(f"Error checking auth: {e}")
-            self.is_authenticated = False
-            if self.router.page.path != "/":
-                return rx.redirect("/")
 
     @rx.event
     def go_to_scene(self):

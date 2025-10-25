@@ -35,10 +35,6 @@ class ActivityUpdate(BaseModel):
 class ActivityResponse(ActivityBase):
     id: str
     host_user_id: str
-    host_name: str
-    host_avatar_url: Optional[str] = None
-    host_vouches_count: int = 0
-    activity_type_name: str
     current_participants: int
     status: ActivityStatus
     share_slug: str

@@ -25,8 +25,6 @@ class EventCreate(EventBase):
 class EventResponse(EventBase):
     id: str
     host_user_id: str
-    host_name: str
-    host_avatar_url: Optional[str] = None
     spots_taken: int
     status: EventStatus
     share_slug: str

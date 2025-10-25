@@ -18,12 +18,39 @@ def activity_detail_page() -> rx.Component:
             class_name="max-w-6xl mx-auto py-12 px-4 md:px-6 text-center",
         ),
         rx.el.div(
-            rx.el.a(
-                rx.icon("arrow-left", class_name="mr-2"),
-                "Back to Activities",
-                href="/scene",
-                on_click=lambda: SceneState.set_current_page("activities"),
-                class_name="flex items-center text-teal-400 hover:underline mb-6 cursor-pointer",
+            rx.el.div(
+                rx.image(
+                    src=rx.cond(
+                        SceneState.selected_activity.get("banner_url"),
+                        rx.get_upload_url(
+                            SceneState.selected_activity.get("banner_url").to_string()
+                        ),
+                        "/placeholder.svg",
+                    ),
+                    class_name="absolute inset-0 w-full h-full object-cover",
+                ),
+                rx.el.div(class_name="absolute inset-0 bg-black/50"),
+                rx.el.div(
+                    rx.el.a(
+                        rx.icon("arrow-left", class_name="mr-2"),
+                        "Back to Activities",
+                        href="/scene",
+                        on_click=lambda: SceneState.set_current_page("activities"),
+                        class_name="flex items-center text-teal-400 hover:underline mb-6 cursor-pointer z-10",
+                    ),
+                    rx.el.h1(
+                        SceneState.selected_activity.get("title"),
+                        class_name="text-4xl font-bold text-white mb-2 z-10",
+                    ),
+                    rx.el.span(
+                        SceneState.selected_activity.get("activity_type")
+                        .to_string()
+                        .capitalize(),
+                        class_name="px-3 py-1 bg-teal-500/30 text-teal-300 text-sm font-medium rounded-full mb-4 inline-block z-10",
+                    ),
+                    class_name="relative max-w-6xl mx-auto w-full px-4 md:px-6 flex flex-col justify-end h-full py-12",
+                ),
+                class_name="relative w-full h-80 bg-gray-800 border-b border-gray-700",
             ),
             rx.el.div(
                 rx.el.div(
@@ -48,16 +75,6 @@ def activity_detail_page() -> rx.Component:
                         ),
                         class_name="bg-gray-800/50 p-4 rounded-xl border border-gray-700 mb-6",
                     ),
-                    rx.el.h1(
-                        SceneState.selected_activity.get("title"),
-                        class_name="text-3xl font-bold text-white mb-2",
-                    ),
-                    rx.el.span(
-                        SceneState.selected_activity.get("activity_type")
-                        .to_string()
-                        .capitalize(),
-                        class_name="px-2 py-1 bg-teal-500/20 text-teal-400 text-sm font-medium rounded-full mb-4 inline-block",
-                    ),
                     rx.el.p(
                         SceneState.selected_activity.get("description"),
                         class_name="text-gray-300 leading-relaxed mb-6",
@@ -75,7 +92,7 @@ def activity_detail_page() -> rx.Component:
                             rx.icon("share-2", class_name="mr-2"),
                             "Share",
                             on_click=rx.set_clipboard(
-                                f"/a/{SceneState.selected_activity.get('share_slug')}"
+                                f"/activity/{SceneState.selected_activity.get('share_slug')}"
                             ),
                             class_name="flex items-center w-full justify-center px-6 py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors",
                         ),
@@ -136,8 +153,10 @@ def activity_detail_page() -> rx.Component:
                                     "Visibility", class_name="text-sm text-gray-400"
                                 ),
                                 rx.el.p(
-                                    SceneState.selected_activity.get("visibility"),
-                                    class_name="text-white font-medium",
+                                    SceneState.selected_activity.get(
+                                        "visibility_scope"
+                                    ),
+                                    class_name="text-white font-medium capitalize",
                                 ),
                                 class_name="ml-3",
                             ),
@@ -146,8 +165,7 @@ def activity_detail_page() -> rx.Component:
                     ),
                     class_name="bg-gray-800/50 p-6 rounded-xl border border-gray-700 w-full lg:w-1/3",
                 ),
-                class_name="flex flex-col lg:flex-row gap-8",
+                class_name="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto py-12 px-4 md:px-6",
             ),
-            class_name="max-w-6xl mx-auto py-12 px-4 md:px-6",
         ),
     )

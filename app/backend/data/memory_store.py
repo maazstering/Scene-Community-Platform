@@ -140,6 +140,9 @@ class MemoryStore:
         storage_activity["datetime_start"] = new_activity["datetime_start"].isoformat()
         storage_activity["created_at"] = new_activity["created_at"].isoformat()
         self._activities[activity_id] = storage_activity
+        new_activity["activity_type"] = self._activities[activity_id].get(
+            "activity_type_id"
+        )
         return new_activity
 
     def get_events(self):
@@ -157,7 +160,7 @@ class MemoryStore:
 
     def create_event(self, event_in, host_user_id):
         event_id = str(uuid.uuid4())
-        new_event = event_in.dict()
+        new_event = event_in.model_dump()
         new_event.update(
             {
                 "id": event_id,
@@ -166,9 +169,13 @@ class MemoryStore:
                 "status": "published",
                 "share_slug": f"event-slug-{event_id[:6]}",
                 "created_at": datetime.utcnow(),
+                "start_time": event_in.start_time,
             }
         )
-        self._events[event_id] = new_event
+        storage_event = new_event.copy()
+        storage_event["start_time"] = new_event["start_time"].isoformat()
+        storage_event["created_at"] = new_event["created_at"].isoformat()
+        self._events[event_id] = storage_event
         return new_event
 
     def get_venues(self):

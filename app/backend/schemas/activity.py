@@ -16,6 +16,7 @@ class ActivityBase(BaseModel):
     visibility_scope: VisibilityScope = VisibilityScope.PUBLIC
     circle_scope_id: Optional[str] = None
     allow_waitlist: bool = True
+    banner_url: Optional[str] = None
 
 
 class ActivityCreate(ActivityBase):

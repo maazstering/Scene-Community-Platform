@@ -16,6 +16,7 @@ class EventBase(BaseModel):
     capacity: Optional[int] = None
     visibility_scope: VisibilityScope = VisibilityScope.PUBLIC
     ticketed: bool = False
+    poster_url: Optional[str] = None
 
 
 class EventCreate(EventBase):

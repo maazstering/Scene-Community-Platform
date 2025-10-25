@@ -68,6 +68,7 @@ class Activity(TypedDict):
     status: str
     share_slug: str
     created_at: str
+    banner_url: Optional[str]
 
 
 import uuid

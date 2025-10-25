@@ -1,43 +1,39 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.backend.api.deps import get_db, get_current_active_user
-from app.backend.crud import activity as crud_activity
+from app.backend.api.deps import get_current_active_user
 from app.backend.schemas.activity import (
-    ActivityResponse,
     ActivityCreate,
     ActivityRequestResponse,
     ActivityRequestCreate,
     ActivityRequestUpdate,
+    ActivityResponse,
 )
 from app.backend.models.user import User
+from app.backend.data.memory_store import memory_store
 
 router = APIRouter()
 
 
-@router.get("", response_model=list[ActivityResponse])
-async def get_activities(db: Session = Depends(get_db)):
+@router.get("", response_model=list[dict])
+async def get_activities():
     """List all activities"""
-    activities = crud_activity.activity["get_multi"](db)
-    return activities
+    return memory_store.get_activities()
 
 
 @router.post("", response_model=ActivityResponse, status_code=201)
 async def create_activity(
-    activity_in: ActivityCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    activity_in: ActivityCreate, current_user: dict = Depends(get_current_active_user)
 ):
     """Create a new activity"""
-    activity = crud_activity.activity["create"](
-        db, obj_in=activity_in, host_user_id=current_user.id
+    activity = memory_store.create_activity(
+        activity_in=activity_in, host_user_id=current_user["id"]
     )
     return activity
 
 
 @router.get("/{activity_id}", response_model=ActivityResponse)
-async def get_activity(activity_id: str, db: Session = Depends(get_db)):
+async def get_activity(activity_id: str):
     """Get activity details"""
-    activity = crud_activity.activity["get"](db, id=activity_id)
+    activity = memory_store.get_activity_by_id(activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     return activity

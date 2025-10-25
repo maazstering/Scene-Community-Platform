@@ -34,15 +34,22 @@ def get_demo_users():
     users = []
     for i, (first, last) in enumerate(names):
         user_id = f"user_{i + 1}"
+        email = f"{first.lower()}.{last.lower()}@scene.com"
         users.append(
             {
                 "id": user_id,
                 "name": f"{first} {last}",
+                "email": email,
                 "avatar": f"https://api.dicebear.com/9.x/notionists/svg?seed={first.lower()}{i}",
                 "city": random.choice(cities),
                 "activities": random.sample(activities, k=random.randint(2, 4)),
                 "vouches_count": random.randint(0, 25),
                 "circles": random.sample(circles, k=random.randint(1, 2)),
+                "is_active": True,
+                "verified_flag": random.choice([True, False]),
+                "created_at": (
+                    datetime.now() - timedelta(days=random.randint(30, 365))
+                ).isoformat(),
             }
         )
     return users

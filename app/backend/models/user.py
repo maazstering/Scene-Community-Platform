@@ -29,7 +29,11 @@ class User(Base):
         "Vouch", foreign_keys="Vouch.receiver_user_id", back_populates="receiver"
     )
     hosted_activities = relationship("Activity", back_populates="host")
-    activity_requests = relationship("ActivityRequest", back_populates="requester")
+    made_activity_requests = relationship(
+        "ActivityRequest",
+        foreign_keys="ActivityRequest.requester_user_id",
+        back_populates="requester",
+    )
     hosted_events = relationship("Event", back_populates="host")
     orders = relationship("Order", back_populates="user")
     venue_bookings = relationship("VenueBooking", back_populates="user")

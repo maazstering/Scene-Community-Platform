@@ -89,6 +89,8 @@ class ActivityRequest(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     activity = relationship("Activity", back_populates="requests")
     requester = relationship(
-        "User", foreign_keys=[requester_user_id], back_populates="activity_requests"
+        "User",
+        foreign_keys=[requester_user_id],
+        back_populates="made_activity_requests",
     )
     decided_by = relationship("User", foreign_keys=[decided_by_user_id])

@@ -1,37 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.backend.api.deps import get_db, get_current_active_user
-from app.backend.crud import event as crud_event
+from app.backend.api.deps import get_current_active_user
 from app.backend.schemas.event import EventResponse, EventCreate
 from app.backend.models.user import User
+from app.backend.data.memory_store import memory_store
 
 router = APIRouter()
 
 
-@router.get("", response_model=list[EventResponse])
-async def get_events(db: Session = Depends(get_db)):
+@router.get("", response_model=list[dict])
+async def get_events():
     """List all events"""
-    events = crud_event.event["get_multi"](db)
-    return events
+    return memory_store.get_events()
 
 
 @router.post("", response_model=EventResponse, status_code=201)
 async def create_event(
-    event_in: EventCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    event_in: EventCreate, current_user: dict = Depends(get_current_active_user)
 ):
     """Create a new event"""
-    event = crud_event.event["create"](
-        db, obj_in=event_in, host_user_id=current_user.id
+    event = memory_store.create_event(
+        event_in=event_in, host_user_id=current_user["id"]
     )
     return event
 
 
 @router.get("/{event_id}", response_model=EventResponse)
-async def get_event(event_id: str, db: Session = Depends(get_db)):
+async def get_event(event_id: str):
     """Get event details"""
-    event = crud_event.event["get"](db, id=event_id)
+    event = memory_store.get_event_by_id(event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event

@@ -1,24 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.backend.api.deps import get_db, get_current_active_user
-from app.backend.crud import user as crud_user
+from app.backend.api.deps import get_current_active_user
 from app.backend.schemas.user import UserResponse, UserUpdate, VouchResponse
 from app.backend.models.user import User
+from app.backend.data.memory_store import memory_store
 
 router = APIRouter()
 
 
 @router.get("", response_model=list[UserResponse])
-async def get_users(db: Session = Depends(get_db)):
+async def get_users():
     """List all users (for demo user switcher)"""
-    users = crud_user.user["get_multi"](db, limit=100)
+    users = memory_store.get_users()
     return users
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: str, db: Session = Depends(get_db)):
+async def get_user(user_id: str):
     """Get user profile"""
-    user = crud_user.user["get"](db, id=user_id)
+    user = memory_store.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

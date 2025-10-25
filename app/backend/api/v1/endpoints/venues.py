@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.backend.schemas.venue import VenueResponse, VenueSlotResponse
+from app.backend.data.memory_store import memory_store
 
 router = APIRouter()
 
@@ -7,7 +8,8 @@ router = APIRouter()
 @router.get("", response_model=list[VenueResponse])
 async def get_venues():
     """List all venues"""
-    return []
+    venues = memory_store.get_venues()
+    return venues
 
 
 @router.get("/{venue_id}", response_model=VenueResponse)

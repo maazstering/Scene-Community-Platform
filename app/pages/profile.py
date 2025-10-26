@@ -32,7 +32,7 @@ def profile_content() -> rx.Component:
         my_events_section(),
         my_bookings_section(),
         quick_actions_section(),
-        class_name="space-y-4 p-4",
+        class_name="space-y-4 p-4 mt-4 md:mt-6",
     )
 
 
@@ -40,7 +40,10 @@ def profile_dashboard() -> rx.Component:
     return scene_layout(
         rx.el.div(
             rx.cond(ProfileState.me, profile_header()),
-            rx.cond(ProfileState.loading, skeleton_loader(), profile_content()),
+            rx.el.div(
+                rx.cond(ProfileState.loading, skeleton_loader(), profile_content()),
+                class_name="mt-24",
+            ),
             class_name="max-w-2xl mx-auto",
         )
     )

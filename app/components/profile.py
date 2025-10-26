@@ -32,9 +32,9 @@ def profile_header() -> rx.Component:
         rx.el.button(
             "Edit Profile",
             on_click=lambda: rx.toast.info("Not implemented"),
-            class_name="px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-lg",
+            class_name="px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-lg hover:bg-gray-600",
         ),
-        class_name="flex items-center justify-between p-4 bg-gray-900 sticky top-0 z-10 border-b border-gray-800",
+        class_name="flex items-center justify-between p-4 bg-gray-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-800",
     )
 
 

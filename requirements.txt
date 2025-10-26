@@ -13,3 +13,6 @@ email-validator
 psycopg2-binary
 sqlalchemy
 httpx
+alembic
+uvicorn[standard]
+dotenv

@@ -43,7 +43,7 @@ def activity_detail_page() -> rx.Component:
                         class_name="text-4xl font-bold text-white mb-2 z-10",
                     ),
                     rx.el.span(
-                        SceneState.selected_activity.get("activity_type")
+                        SceneState.selected_activity.get("activity_type_id", "")
                         .to_string()
                         .capitalize(),
                         class_name="px-3 py-1 bg-teal-500/30 text-teal-300 text-sm font-medium rounded-full mb-4 inline-block z-10",

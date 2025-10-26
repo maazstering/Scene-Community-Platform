@@ -55,7 +55,7 @@ class GeoPoint(TypedDict):
 class Activity(TypedDict):
     id: str
     host_user_id: str
-    activity_type: str
+    activity_type_id: str
     title: str
     description: str
     datetime_start: str
@@ -141,14 +141,16 @@ class SceneState(rx.State):
             return rx.redirect("/scene")
 
     def _load_demo_data(self):
-        """Initialize with Pakistan-focused demo data from seed file"""
+        """Initialize with Pakistan-focused demo data from memory store"""
+        from app.backend.data.memory_store import memory_store
+
         if self.users:
             return
-        self.users = {u["id"]: u for u in seed.get_demo_users()}
-        self.venues = {v["id"]: v for v in seed.get_demo_venues()}
-        self.activities = {a["id"]: a for a in seed.get_demo_activities()}
-        self.events = {e["id"]: e for e in seed.get_demo_events()}
-        self.circles = {c["id"]: c for c in seed.get_demo_circles()}
+        self.users = {u["id"]: u for u in memory_store.get_users()}
+        self.venues = {v["id"]: v for v in memory_store.get_venues()}
+        self.activities = {a["id"]: a for a in memory_store.get_activities()}
+        self.events = {e["id"]: e for e in memory_store.get_events()}
+        self.circles = {c["id"]: c for c in memory_store.get_circles()}
         self.join_intents = {ji["id"]: ji for ji in seed.get_demo_join_intents()}
         self.activity_posts = self.activities
 
@@ -157,7 +159,7 @@ class SceneState(rx.State):
         """Get current authenticated user"""
         if self.current_user_id and self.current_user_id in self.users:
             user = self.users[self.current_user_id]
-            if "avatar" not in user:
+            if "avatar" not in user or not user["avatar"]:
                 user["avatar"] = (
                     f"https://api.dicebear.com/9.x/notionists/svg?seed={user['name'].lower().replace(' ', '')}"
                 )
@@ -180,27 +182,31 @@ class SceneState(rx.State):
             activities = [
                 a
                 for a in activities
-                if a["activity_type"] == self.selected_activity_filter
+                if a["activity_type_id"] == self.selected_activity_filter
             ]
         if self.activity_filters["activity_type"]:
             activities = [
                 a
                 for a in activities
-                if a.get("activity_type") == self.activity_filters["activity_type"]
+                if a.get("activity_type_id") == self.activity_filters["activity_type"]
             ]
         if self.activity_filters["visibility"]:
             activities = [
                 a
                 for a in activities
-                if a.get("visibility", "").lower()
+                if a.get("visibility_scope", "").lower()
                 == self.activity_filters["visibility"].lower()
             ]
-        activities.sort(key=lambda x: x.get("datetime_start", ""), reverse=False)
+        activities.sort(key=lambda x: x.get("datetime_start"), reverse=False)
         return activities
 
     @rx.event
     def list_public_activities(self) -> list[dict]:
-        return [a for a in self.activities.values() if a["visibility"] == "Public"]
+        return [
+            a
+            for a in self.activities.values()
+            if a.get("visibility_scope", "").lower() == "public"
+        ]
 
     @rx.event
     def find_user_by_email(self, email: str) -> dict | None:
@@ -278,7 +284,9 @@ class SceneState(rx.State):
     @rx.var
     def activity_types(self) -> list[str]:
         """Get available activity types"""
-        return sorted(list(set((a["activity_type"] for a in self.activities.values()))))
+        return sorted(
+            list(set((a["activity_type_id"] for a in self.activities.values())))
+        )
 
     @rx.var
     def selected_activity_for_request_details(self) -> dict | None:
@@ -380,7 +388,7 @@ class SceneState(rx.State):
         elif request_type == "event":
             target = self.events.get(target_id)
         if target:
-            is_public = target.get("visibility") == "Public"
+            is_public = target.get("visibility_scope", "").lower() == "public"
             if is_public:
                 if target.get("current_participants", 0) < target.get("capacity", 0):
                     new_request["status"] = RequestStatus.APPROVED

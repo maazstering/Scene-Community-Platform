@@ -140,8 +140,8 @@ def event_detail_page() -> rx.Component:
                                     "Visibility", class_name="text-sm text-gray-400"
                                 ),
                                 rx.el.p(
-                                    SceneState.selected_event.get("visibility"),
-                                    class_name="text-white font-medium",
+                                    SceneState.selected_event.get("visibility_scope"),
+                                    class_name="text-white font-medium capitalize",
                                 ),
                                 class_name="ml-3",
                             ),

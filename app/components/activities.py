@@ -26,13 +26,13 @@ def activity_card(activity: dict) -> rx.Component:
                         rx.el.div(
                             rx.icon(
                                 rx.cond(
-                                    activity["activity_type"] == "hiking",
+                                    activity["activity_type_id"] == "hiking",
                                     "mountain",
                                     rx.cond(
-                                        activity["activity_type"] == "food",
+                                        activity["activity_type_id"] == "food",
                                         "utensils",
                                         rx.cond(
-                                            activity["activity_type"] == "football",
+                                            activity["activity_type_id"] == "football",
                                             "football",
                                             "calendar",
                                         ),
@@ -41,7 +41,7 @@ def activity_card(activity: dict) -> rx.Component:
                                 class_name="h-5 w-5 text-teal-400",
                             ),
                             rx.el.span(
-                                activity["activity_type"].title(),
+                                activity["activity_type_id"].title(),
                                 class_name="ml-2 text-sm font-medium text-teal-400 capitalize",
                             ),
                             class_name="flex items-center",

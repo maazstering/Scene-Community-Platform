@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from app.backend.api.deps import get_current_active_user
 from app.backend.schemas.activity import (
     ActivityCreate,
@@ -14,9 +15,14 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[dict])
-async def get_activities():
+async def get_activities(host_id: Optional[str] = None, status: Optional[str] = None):
     """List all activities"""
-    return memory_store.get_activities()
+    activities = memory_store.get_activities()
+    if host_id == "me":
+        return [a for a in activities if a["host_user_id"] == "user_1"]
+    if status:
+        return [a for a in activities if a.get("status") == status]
+    return activities
 
 
 @router.post("", response_model=ActivityResponse, status_code=201)

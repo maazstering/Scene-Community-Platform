@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from typing import Optional
 from app.backend.schemas.venue import VenueResponse, VenueSlotResponse
 from app.backend.data.memory_store import memory_store
 

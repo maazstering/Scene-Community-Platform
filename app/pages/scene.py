@@ -148,12 +148,7 @@ def venues_dashboard() -> rx.Component:
     )
 
 
-def profile_dashboard() -> rx.Component:
-    return rx.el.div(
-        rx.el.h2("Profile Dashboard", class_name="text-2xl font-bold text-white mb-6"),
-        rx.el.p("Manage your profile and settings.", class_name="text-gray-400"),
-        class_name="p-6",
-    )
+from app.pages.profile import profile_dashboard
 
 
 def scene() -> rx.Component:

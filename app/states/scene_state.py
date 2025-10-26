@@ -303,6 +303,8 @@ class SceneState(rx.State):
     @rx.event
     def set_current_page(self, page: str):
         """Navigate to different pages"""
+        if page == "profile":
+            return rx.redirect("/profile")
         self.current_page = page
 
     @rx.event

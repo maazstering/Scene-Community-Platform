@@ -46,9 +46,9 @@ def scene_header() -> rx.Component:
                     ),
                 ),
                 rx.el.button(
-                    rx.icon("users", class_name="h-5 w-5"),
+                    rx.icon("user", class_name="h-5 w-5"),
                     "Profile",
-                    on_click=lambda: SceneState.set_current_page("profile"),
+                    on_click=lambda: rx.redirect("/profile"),
                     class_name=rx.cond(
                         SceneState.current_page == "profile",
                         "flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/20 text-teal-400 font-medium transition-all duration-200",
@@ -113,7 +113,7 @@ def bottom_nav() -> rx.Component:
             ),
             rx.el.button(
                 rx.icon("user", class_name="h-6 w-6"),
-                on_click=lambda: SceneState.set_current_page("profile"),
+                on_click=lambda: rx.redirect("/profile"),
                 class_name="flex flex-col items-center justify-center text-gray-400 hover:text-teal-400 transition-colors w-full",
             ),
             class_name="flex items-center justify-around h-16 bg-gray-900/90 backdrop-blur-sm w-full",

@@ -48,7 +48,15 @@ app = rx.App(
     api_transformer=backend_app,
 )
 app.add_page(index, on_load=BaseState.check_auth)
+from app.states.profile_state import ProfileState
+from app.pages.profile import profile_dashboard
+
 app.add_page(scene, route="/scene", on_load=[BaseState.check_auth, SceneState.on_load])
+app.add_page(
+    profile_dashboard,
+    route="/profile",
+    on_load=[BaseState.check_auth, ProfileState.on_profile_load],
+)
 app.add_page(
     scene,
     route="/activity/[activity_id]",

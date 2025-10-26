@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from app.backend.api.deps import get_current_active_user
 from app.backend.schemas.event import EventResponse, EventCreate
 from app.backend.models.user import User
@@ -8,9 +9,14 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[dict])
-async def get_events():
+async def get_events(host_id: Optional[str] = None, status: Optional[str] = None):
     """List all events"""
-    return memory_store.get_events()
+    events = memory_store.get_events()
+    if host_id == "me":
+        return [e for e in events if e["host_user_id"] == "user_1"]
+    if status:
+        return events
+    return events
 
 
 @router.post("", response_model=EventResponse, status_code=201)
